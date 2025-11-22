@@ -18,5 +18,7 @@ TARGET_COLUMN = "default_90d"
 # --- Configuración MLflow ---
 # Usamos un store local dentro del repo.
 MLFLOW_DIR = BASE_DIR / "mlruns"
-MLFLOW_TRACKING_URI = f"file://{MLFLOW_DIR}"
+# MLFLOW_TRACKING_URI = f"file://{MLFLOW_DIR}" # Linux WSL
+# MLFLOW_TRACKING_URI = str(MLFLOW_DIR.resolve())
+MLFLOW_TRACKING_URI = MLFLOW_DIR.as_uri() # Windows Powershell
 MLFLOW_EXPERIMENT_NAME = "credit_risk_baseline"

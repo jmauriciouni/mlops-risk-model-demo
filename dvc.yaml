@@ -1,6 +1,6 @@
 stages:
   prepare:
-    cmd: python3 -m src.data_prep
+    cmd: python -m src.data_prep
     deps:
       - src/data_prep.py
       - data/raw/credit_risk.csv
@@ -9,7 +9,7 @@ stages:
       - data/processed/valid.csv
 
   train:
-    cmd: python3 -m src.train
+    cmd: python -m src.train
     deps:
       - src/train.py
       - src/model_utils.py

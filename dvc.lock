@@ -1,0 +1,46 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: python -m src.data_prep
+    deps:
+    - path: data/raw/credit_risk.csv
+      hash: md5
+      md5: 801d6b24625fac942c97c11485ab8e51
+      size: 1615322
+    - path: src/data_prep.py
+      hash: md5
+      md5: f3aa2b7fa1c8eb9f235a6e4e67fe9e49
+      size: 915
+    outs:
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 5ab9661c4f33d586e33b3914b52b0408
+      size: 1304121
+    - path: data/processed/valid.csv
+      hash: md5
+      md5: 20fd31125959090885b397d230d7695b
+      size: 326465
+  train:
+    cmd: python -m src.train
+    deps:
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 5ab9661c4f33d586e33b3914b52b0408
+      size: 1304121
+    - path: data/processed/valid.csv
+      hash: md5
+      md5: 20fd31125959090885b397d230d7695b
+      size: 326465
+    - path: src/model_utils.py
+      hash: md5
+      md5: ef95e4631a380c3b76344f32039c07cc
+      size: 1744
+    - path: src/train.py
+      hash: md5
+      md5: e425fa75e48d35913def836150c6b2d4
+      size: 2746
+    outs:
+    - path: models/model-latest.pkl
+      hash: md5
+      md5: f88b0b9381f9edeaf6cbd73b04222d89
+      size: 6151
