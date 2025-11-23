@@ -7,7 +7,7 @@ from sklearn.metrics import roc_auc_score, f1_score
 
 import mlflow
 import mlflow.sklearn
-
+import json
 from .config import (
     PROCESSED_DATA_DIR,
     MODELS_DIR,
@@ -16,6 +16,8 @@ from .config import (
     LATEST_MODEL_PATH,
     MLFLOW_TRACKING_URI,
     MLFLOW_EXPERIMENT_NAME,
+    METRICS_DIR,
+    BASELINE_METRICS_PATH,
 )
 from .model_utils import split_features_target, build_model_pipeline
 
@@ -68,6 +70,16 @@ def main() -> None:
 
         print(f"AUC valid: {auc:.4f}")
         print(f"F1  valid: {f1:.4f}")
+
+        # --- Guardar métricas baseline para detectar model drift ---
+        METRICS_DIR.mkdir(parents=True, exist_ok=True)
+        baseline_metrics = {
+            "auc_valid": float(auc),
+            "f1_valid": float(f1),
+        }
+        with open(BASELINE_METRICS_PATH, "w", encoding="utf-8") as f:
+            json.dump(baseline_metrics, f, indent=2)
+        print(f"Métricas baseline guardadas en: {BASELINE_METRICS_PATH}")
 
         # 5.1) Log de métricas
         mlflow.log_metrics(

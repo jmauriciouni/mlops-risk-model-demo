@@ -2,7 +2,7 @@ name: Continuous Training (CT)
 
 on:
   schedule:
-    # Cada 10 minutos (zona horaria: UTC)
+    # Cada 10 minutos (UTC)
     - cron: "*/10 * * * *"
   workflow_dispatch:
 
@@ -12,6 +12,9 @@ jobs:
 
     env:
       PYTHON_VERSION: "3.11"
+      # Puedes controlar qué tipo de drift simular:
+      # data, model o both
+      DRIFT_SCENARIO: "both"
 
     steps:
       # 0) Checkout
@@ -30,17 +33,39 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 3) PREPROCESAMIENTO
+      # 3) Generar batch de producción (simular data/model drift)
+      - name: Generar datos de producción (simular drift)
+        env:
+          DRIFT_SCENARIO: ${{ env.DRIFT_SCENARIO }}
+        run: |
+          python -m src.simulate_production_data
+
+      # 4) Detectar drift y decidir si reentrenar
+      - name: Detectar data drift y model drift
+        id: detect
+        run: |
+          python -m src.detect_drift
+
+      # 5) PREPROCESAMIENTO (solo si retrain = true)
       - name: Preprocesamiento de datos (CT)
+        if: steps.detect.outputs.retrain == 'true'
         run: |
           python -m src.data_prep
 
-      # 4) ENTRENAMIENTO
+      # 6) ENTRENAMIENTO (solo si retrain = true)
       - name: Entrenamiento del modelo (CT)
+        if: steps.detect.outputs.retrain == 'true'
         run: |
           python -m src.train
 
-      # 5) EVALUACIÓN
+      # 7) EVALUACIÓN (solo si retrain = true)
       - name: Evaluación del modelo (CT)
+        if: steps.detect.outputs.retrain == 'true'
         run: |
           python -m src.evaluate
+
+      # 8) Log informativo si NO hubo retraining
+      - name: No retrain necesario
+        if: steps.detect.outputs.retrain != 'true'
+        run: |
+          echo "No se detectó drift significativo. No se ejecuta reentrenamiento en este ciclo."

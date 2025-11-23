@@ -1,6 +1,1 @@
-# Mantener carpeta vacía
-*
-!.gitignore
 
-/train.csv
-/valid.csv
